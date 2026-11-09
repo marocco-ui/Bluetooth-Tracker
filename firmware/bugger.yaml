@@ -1,0 +1,117 @@
+# Bugger: single-receiver BLE room tracker
+# Board: ESP32-C3-DevKit-RUST-1 (ESP32-C3-MINI-1, native USB, WS2812 on GPIO2)
+#
+# Flash the first time over USB:
+#   esphome run firmware/bugger.yaml
+# After that it updates over Wi-Fi.
+
+esphome:
+  name: bugger
+  friendly_name: Bugger
+
+esp32:
+  board: esp32-c3-devkitm-1
+  variant: esp32c3
+  framework:
+    type: esp-idf
+
+# The Rust board has no USB-to-UART chip. Logs come out of the C3's own USB port.
+logger:
+  hardware_uart: USB_SERIAL_JTAG
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: "Bugger Fallback"
+    password: !secret ap_password
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+# Built-in page at http://bugger.local
+# Version 3 also streams every sensor update at /events (Server-Sent Events).
+# The 3D dashboard subscribes to that stream, so the C3 never has to serve it.
+web_server:
+  port: 80
+  version: 3
+  # Lets the 3D dashboard (served from the laptop on port 8000) read /events
+  allowed_origins:
+    - http://localhost:8000
+    - http://127.0.0.1:8000
+
+# ---------- Bluetooth ----------
+
+esp32_ble_tracker:
+  scan_parameters:
+    interval: 320ms
+    window: 300ms      # listen ~94 % of the time; Wi-Fi gets the rest
+    active: false      # passive: just listen, never ask devices for more data
+
+sensor:
+  # Raw signal strength of your iPhone. The IRK lets the C3 recognize the phone
+  # through every random address change. See docs/irk-capture.md.
+  - platform: ble_rssi
+    irk: !secret iphone_irk
+    name: "iPhone RSSI"
+    id: iphone_rssi
+    unit_of_measurement: dBm
+    filters:
+      - median:
+          window_size: 5
+          send_every: 1
+          send_first_at: 1
+
+  # Distance from the log-distance path-loss model (see docs/math.md).
+  # A = RSSI at 1 m, n = path-loss exponent. Both get replaced in phase 2 calibration.
+  - platform: template
+    name: "iPhone distance"
+    id: iphone_distance
+    unit_of_measurement: m
+    accuracy_decimals: 2
+    update_interval: 1s
+    lambda: |-
+      if (isnan(id(iphone_rssi).state)) return NAN;
+      const float A = -47.5f;   // calibrated 2026-11-03, 4 points
+      const float n = 3.2f;     // calibrated 2026-11-03, fit error 2.7 dB
+      return powf(10.0f, (A - id(iphone_rssi).state) / (10.0f * n));
+    on_value:
+      then:
+        - lambda: |-
+            auto call = id(zone_led).turn_on();
+            call.set_brightness(0.25);
+            if (isnan(x))       call.set_rgb(0.3, 0.0, 0.0);  // dim red: phone not seen
+            else if (x < 1.0f)  call.set_rgb(0.0, 1.0, 0.0);  // green: at the desk
+            else if (x < 2.5f)  call.set_rgb(0.0, 0.4, 1.0);  // blue: middle of the room
+            else                call.set_rgb(0.7, 0.0, 1.0);  // purple: far side
+            call.perform();
+
+  # Onboard SHTC3 (0x70). Free extra data for the dashboard.
+  - platform: shtcx
+    address: 0x70
+    temperature:
+      name: "Room temperature"
+    humidity:
+      name: "Room humidity"
+    update_interval: 60s
+
+  - platform: wifi_signal
+    name: "Wi-Fi signal"
+    update_interval: 30s
+
+# ---------- Onboard hardware ----------
+
+# SHTC3 and the ICM-42670 IMU share this bus. Don't wire anything else to GPIO8 or GPIO10.
+i2c:
+  sda: GPIO10
+  scl: GPIO8
+
+light:
+  - platform: esp32_rmt_led_strip
+    id: zone_led
+    name: "Zone LED"
+    pin: GPIO2
+    num_leds: 1
+    chipset: ws2812
+    rgb_order: GRB

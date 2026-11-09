@@ -1,0 +1,33 @@
+# One-time firmware to pull your iPhone's IRK.
+# Uses DerekSeaman/irk-capture (ESPHome 2026.7+, ESP-IDF only).
+# Flash this, grab the key, then flash bugger.yaml.
+
+esphome:
+  name: irk-capture
+  friendly_name: IRK Capture
+
+esp32:
+  board: esp32-c3-devkitm-1
+  variant: esp32c3
+  flash_size: 4MB
+  framework:
+    type: esp-idf
+
+logger:
+  hardware_uart: USB_SERIAL_JTAG
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+# Shows the captured IRK at http://irk-capture.local, no Home Assistant needed
+web_server:
+  port: 80
+  version: 3
+
+packages:
+  device:
+    url: https://github.com/DerekSeaman/irk-capture
+    ref: main
+    file: ESPHome Devices/irk-capture-base.yaml
+    refresh: always

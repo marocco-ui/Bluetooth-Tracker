@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bugger: room tracker</title>
+<style>
+  :root {
+    --bg: #0d1117; --panel: rgba(13, 17, 23, 0.82); --line: rgba(255, 255, 255, 0.09);
+    --text: #e6edf3; --dim: #8b949e; --desk: #3fb950; --mid: #4c8dff; --far: #b26bff; --off: #f85149;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+    font: 14px/1.4 "Inter", "Segoe UI", system-ui, sans-serif; overflow: hidden; }
+  #scene { position: fixed; inset: 0; }
+  .panel { position: fixed; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 12px; backdrop-filter: blur(10px); padding: 14px 16px; }
+  #hud { top: 16px; left: 16px; width: 280px; }
+  #hud h1 { margin: 0 0 2px; font-size: 18px; font-weight: 650; letter-spacing: 0.2px; }
+  #hud .sub { color: var(--dim); font-size: 12px; margin-bottom: 12px; }
+  .status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--dim); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--off); box-shadow: 0 0 8px currentColor; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .stat { background: rgba(255,255,255,0.03); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+  .stat .k { color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; }
+  .stat .v { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .stat .u { color: var(--dim); font-size: 12px; margin-left: 2px; }
+  .wide { grid-column: span 2; }
+  #zone { font-weight: 650; }
+  #spark { width: 100%; height: 54px; display: block; margin-top: 10px; }
+  #legend { bottom: 16px; left: 16px; font-size: 12px; color: var(--dim); display: flex; gap: 14px; align-items: center; }
+  .sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+  #conn { top: 16px; right: 16px; width: 250px; font-size: 12px; }
+  #conn label { color: var(--dim); display: block; margin-bottom: 4px; }
+  #conn .row { display: flex; gap: 6px; }
+  #conn input { flex: 1; min-width: 0; background: #0b0f14; color: var(--text); border: 1px solid var(--line);
+    border-radius: 6px; padding: 6px 8px; font: inherit; }
+  #conn button { background: #21262d; color: var(--text); border: 1px solid var(--line); border-radius: 6px;
+    padding: 6px 10px; font: inherit; cursor: pointer; }
+  #conn button:hover { background: #30363d; }
+  #conn .hint { color: var(--dim); margin-top: 8px; }
+  .label { position: fixed; transform: translate(-50%, -130%); pointer-events: none; font-size: 11px;
+    font-weight: 600; padding: 3px 7px; border-radius: 6px; background: rgba(13,17,23,0.85);
+    border: 1px solid var(--line); white-space: nowrap; }
+</style>
+<script type="importmap">
+  { "imports": { "three": "./vendor/three.bundle.js" } }
+</script>
+</head>
+<body>
+<div id="scene"></div>
+
+<div id="hud" class="panel">
+  <h1>Bugger</h1>
+  <div class="sub">One-receiver BLE tracker · ESP32-C3</div>
+  <span class="status"><span class="dot" id="dot"></span><span id="status">Connecting…</span></span>
+  <div class="grid">
+    <div class="stat"><div class="k">Signal</div><div class="v"><span id="rssi">--</span><span class="u">dBm</span></div></div>
+    <div class="stat"><div class="k">Distance</div><div class="v"><span id="dist">--</span><span class="u">ft</span></div></div>
+    <div class="stat"><div class="k">Zone</div><div class="v" id="zone">--</div></div>
+    <div class="stat"><div class="k">Likely spot</div><div class="v" id="spot" style="font-size:15px;padding-top:4px">--</div></div>
+  </div>
+  <canvas id="spark"></canvas>
+</div>
+
+<div id="conn" class="panel">
+  <label for="host">Bugger address</label>
+  <div class="row"><input id="host" spellcheck="false"><button id="go">Connect</button></div>
+  <div class="row" style="margin-top:6px"><button id="sim" style="flex:1">Demo mode</button></div>
+  <div class="hint">Drag to orbit · scroll to zoom · right-drag to pan</div>
+</div>
+
+<div id="legend" class="panel">
+  <span><span class="sw" style="background:var(--desk)"></span>Desk &lt; 3.3 ft</span>
+  <span><span class="sw" style="background:var(--mid)"></span>Mid 3.3 to 8.2 ft</span>
+  <span><span class="sw" style="background:var(--far)"></span>Far &gt; 8.2 ft</span>
+</div>
+
+<script type="module" src="./main.js"></script>
+</body>
+</html>

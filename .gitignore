@@ -1,0 +1,6 @@
+firmware/secrets.yaml
+firmware/.esphome/
+.esphome/
+__pycache__/
+.venv/
+Screen Recording*.mp4

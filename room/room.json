@@ -1,0 +1,33 @@
+{
+  "units": "ft",
+  "origin": "corner where the window wall meets the mirror-door wall",
+  "axes": { "x": "along the window wall", "y": "into the room", "z": "up" },
+  "room": { "length_x": 13.5, "width_y": 10.5, "ceiling_z": 8.5 },
+  "receiver": { "name": "Bugger", "x": 9.2, "y": 0.05, "z": 4.67, "mount": "window wall, in front of the desk", "source": "measured, 4 ft 8 in" },
+  "phone_z": 3.5,
+  "calibration": { "A_dbm": -47.5, "n": 3.2, "date": "2026-11-03" },
+  "furniture": [
+    { "name": "Your bed",       "type": "bed_green",  "x": [0.0, 6.75],  "y": [0.0, 3.33],  "z": [0, 2.0], "head": "x0", "source": "measured" },
+    { "name": "Nightstand 1",   "type": "nightstand", "x": [0.0, 0.92],  "y": [3.33, 4.46], "z": [0, 2.0], "source": "measured, height estimated" },
+    { "name": "Desk",           "type": "desk",       "x": [6.9, 11.5],  "y": [0.0, 1.92],  "z": [0, 3.0], "source": "measured" },
+    { "name": "Chair",          "type": "chair",      "x": [8.7, 9.9],   "y": [2.2, 3.3],   "z": [0, 3.2], "source": "estimated" },
+    { "name": "Bike",           "type": "bike",       "x": [11.6, 13.3], "y": [0.3, 1.3],   "z": [0, 6.3], "source": "estimated" },
+    { "name": "Roommate's bed", "type": "bed_plaid",  "x": [4.5, 11.0],  "y": [7.25, 10.5], "z": [0, 2.0], "head": "x0", "source": "estimated" },
+    { "name": "Nightstand 2",   "type": "nightstand", "x": [2.4, 4.5],   "y": [8.5, 10.5],  "z": [0, 2.0], "source": "estimated" },
+    { "name": "Rug",            "type": "rug",        "x": [3.0, 11.8],  "y": [3.0, 9.8],   "z": [0, 0.03], "source": "estimated" }
+  ],
+  "openings": [
+    { "name": "Window",       "type": "window",      "wall": "y=0",    "from": 0.6, "to": 6.4,  "z": [2.6, 7.0] },
+    { "name": "Closet doors", "type": "door_double", "wall": "x=13.5", "from": 2.0, "to": 5.0,  "z": [0, 6.75] },
+    { "name": "Closet door",  "type": "door",        "wall": "x=13.5", "from": 5.5, "to": 7.6,  "z": [0, 6.75] },
+    { "name": "Hall door",    "type": "doorway",     "wall": "x=13.5", "from": 8.1, "to": 10.3, "z": [0, 6.75] },
+    { "name": "Mirror door",  "type": "door",        "wall": "x=0",    "from": 7.0, "to": 9.6,  "z": [0, 6.75] }
+  ],
+  "hotspots": [
+    { "name": "Desk chair",  "x": 9.2,  "y": 2.7, "weight": 2.0 },
+    { "name": "Your bed",    "x": 3.4,  "y": 1.7, "weight": 2.0 },
+    { "name": "Mid room",    "x": 6.8,  "y": 5.2, "weight": 1.0 },
+    { "name": "Hall door",   "x": 12.8, "y": 9.2, "weight": 1.0 },
+    { "name": "Mirror door", "x": 0.7,  "y": 8.3, "weight": 1.0 }
+  ]
+}
